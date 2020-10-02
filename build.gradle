@@ -1,0 +1,66 @@
+defaultTasks 'clean', 'build', 'packageDistribution'
+
+apply plugin: 'java'
+
+tasks.whenTaskAdded { task -> 
+  println "[hook:tasks.whenTaskAdded] The task ${task.name} was added to the execution plan"
+}
+
+jar {
+  manifest {
+    attributes('Main-Class': 'hello.HelloWorld')
+  }
+  from {
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies() {
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.2'
+}
+
+task dummy {
+}
+
+task packageDistribution(type: Zip) {
+  from 'build/libs'
+  baseName 'distPackage'
+  version '1.0'
+}
+
+gradle.taskGraph.beforeTask{Task task -> 
+  println "[hook:gradle.taskGraph.beforeTask] Starting Task '${task.name}'"
+}
+
+gradle.taskGraph.afterTask{Task task, TaskState state -> 
+  if(state.failure) {
+    println "[hook:gradle.taskGraph.afterTask] Task '${task.name}' FAILED"
+  } else {
+    println "[hook:gradle.taskGraph.afterTask] Task '${task.name}' DONE"
+  }
+  
+}
+
+gradle.buildFinished { buildResult -> 
+if(buildResult.failure != null) {
+    println "[hook:gradle.buildFinished] build FAILED - '${buildResult.failure}'"
+  } else {
+    println "[hook:gradle.buildFinished] build SUCCEDED"
+  }
+
+  println "Begin looping buildResult"
+  buildResult.properties.each { prop, val ->
+    if(prop in ["metaClass","class"]) return
+    if(buildResult.hasProperty(prop)) {
+      print(prop)
+      print(" ")
+      println(val)
+    }
+    println "End looping buildResult"
+  }
+
+}
