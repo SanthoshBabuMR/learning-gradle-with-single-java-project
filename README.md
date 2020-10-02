@@ -12,6 +12,6 @@
 
 ## Run commands
 - gradle  
-  - generates jar in **./build/libs/**
+  - generates jar in **./build/libs/myHelloWorld-1.0-SNAPSHOT.jar**
   - generates distribution zip in **./build/distributions/distPackage-1.0.zip**
 - java -jar ./build/libs/myHelloWorld-1.0-SNAPSHOT.jar
